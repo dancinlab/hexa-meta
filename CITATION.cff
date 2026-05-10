@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use hexa-meta in academic work, please cite as below."
+title: "hexa-meta: n=6 meta-theory, self-organizing architecture, proof-certification and discovery tooling"
+authors:
+  - family-names: "박"
+    given-names: "민우"
+    affiliation: dancinlab
+license: MIT
+repository-code: "https://github.com/dancinlab/hexa-meta"
+url: "https://github.com/dancinlab/hexa-meta"
+version: "0.1.0"
+date-released: 2026-05-10

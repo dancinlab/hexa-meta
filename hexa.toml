@@ -1,0 +1,38 @@
+# hexa.toml — hexa-meta standalone package manifest
+# Spec: shared/hexa-lang/hexa-toml-spec.json (version 1.0.0)
+#
+# Provenance: MOVED out of dancinlab/canon at canon@a86ca143 on 2026-05-10.
+# hexa-meta is the home for n=6 *self-referential* material — the meta-theory,
+# self-organizing architecture papers, proof-certification chains, and the
+# domain-agnostic discovery / DSE / verification tooling that used to live
+# under canon's theory/proofs/, papers/ and bridge/origins/.
+#
+# Pattern: MOVE (canon no longer holds these; recover via canon git log).
+
+[package]
+name = "hexa-meta"
+version = "0.1.0"
+entry = "cli/hexa-meta.hexa"
+description = "n=6 meta-theory + self-organizing architecture + proof-certification + domain-agnostic discovery/DSE/verify tooling (50-doc bundle moved out of canon)."
+license = "MIT"
+authors = ["박민우 <nerve011235@gmail.com>"]
+repository = "https://github.com/dancinlab/hexa-meta"
+homepage = "https://github.com/dancinlab/hexa-meta"
+readme = "README.md"
+keywords = ["n6", "meta-theory", "self-organization", "proof-certification", "discovery-engine", "dse", "hexa-family"]
+categories = ["meta", "research-corpus", "spec-substrate"]
+
+# ── Layout ─────────────────────────────────────────────────────
+# proofs/  — 11 meta-theory proof docs (attractor-meta, ouroboros-alpha, the-number-24, ...)
+# papers/  — 24 self-architecture + cross-cutting papers (n6-arch-*, n6-mk3-synthesis, n6-cross-*, ...)
+# tools/   — 15 domain-agnostic calc/DSE/verify tools (discovery-engine, deep-miner, universal-dse, ...)
+
+[closure]
+verbs_total  = 0
+verbs_wired  = 0
+verdict      = "BUNDLE_FIRST"
+extracted_from = "canon/{theory/proofs,papers,bridge/origins} @ a86ca143 (MOVE)"
+
+[scope]
+honest_scope = "24 papers + 11 proofs + 15 tool dirs MOVED out of canon. This is a research corpus + tooling bundle, not (yet) an n=6 HEXA-template authored standalone. v0.1.0 ships as BUNDLE_FIRST."
+not_scope = ["domain-specific specs (live in their hexa-* standalones)", "in-vivo / external validation", "regulatory clearance"]
