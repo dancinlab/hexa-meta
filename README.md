@@ -4,6 +4,7 @@
 > architecture papers, proof-certification chains, and the domain-agnostic
 > discovery / DSE / verification tooling that powers every other `hexa-*` repo.
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20114998.svg)](https://doi.org/10.5281/zenodo.20114998)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-0.1.0-informational.svg)](hexa.toml)
 [![Bundle](https://img.shields.io/badge/bundle-24_papers_+_11_proofs_+_15_tools-blue.svg)](#layout)
