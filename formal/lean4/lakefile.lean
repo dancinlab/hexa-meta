@@ -23,11 +23,13 @@ lean_lib «N6» where
              `N6.Weave.PiP2Termination,
              `N6.Weave.ClosureCert]
 
--- Mathlib is NOT required by the current proof bodies. The 4-axis proofs
--- use only Lean 4 core tactics (`rfl`, `simp [...]`, `omega`, structural
--- case-splits). The earlier forward-looking `require mathlib` was removed
--- 2026-05-12 because (a) no proof body currently consumes a Mathlib lemma,
--- and (b) the `master` pin made `lake build` clone the entire mathlib4
--- repo (~minutes) on every fresh build, which is wasted work as long as
--- no proof imports it. Re-add (with a SHA pin, not `master`) when the
--- first real proof body needs a Mathlib lemma.
+-- Mathlib re-added 2026-05-12 (cycle-30++, Axis 4 v2 promotion start):
+-- F-CL-FORMAL-4 v2 (ClosureCert merge-idempotence with caveat-bag + signer-set
+-- invariants) needs Mathlib for `Multiset` / `Finset.union` / `Multiset.dedup`
+-- machinery. The `master` pin is provisional — `lake update` resolves to a
+-- specific commit recorded in `lake-manifest.json`; that SHA is the
+-- reproducibility anchor. The mathlib4-cache (~828 MB on this host at
+-- ~/.cache/mathlib) provides precompiled oleans, so `lake exe cache get`
+-- after `lake update` avoids a cold Mathlib build.
+require mathlib from git
+  "https://github.com/leanprover-community/mathlib4.git" @ "master"
