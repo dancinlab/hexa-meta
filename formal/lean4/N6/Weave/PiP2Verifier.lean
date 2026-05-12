@@ -1,24 +1,36 @@
 -- N6.Weave.PiP2Verifier
 --
--- WEAVE-semantics v2 vocabulary for axis F-CL-FORMAL-3 (Π^p_2 verifier
--- termination). PROMOTED 2026-05-12 (cycle-30+++) from the v1 polynomial
--- bounded-instance encoding (`c.size * (q.depth + 1) + q.payload`) to the
--- v2 exponential-in-depth worst case (`c.size * 2 ^ q.depth + q.payload`),
--- matching the literature-standard Π^p_2 complexity bound (the second
--- level of the polynomial hierarchy is QBF-complete with alternation
--- count d → 2^d quantifier-elimination work at worst).
+-- WEAVE-semantics v3 vocabulary for axis F-CL-FORMAL-3 (Π^p_2 verifier
+-- termination). PROMOTED v2 → v3 on 2026-05-12 (cycle-30+++++) from the
+-- v2 closed-form `c.size * 2 ^ q.depth + q.payload` upper bound to a
+-- *recursive* verifier function `verifierStepsRec` that models the
+-- alternation cascade structurally on `depth`. Termination is then a
+-- consequence of Lean's structural-recursion well-foundedness on `Nat`
+-- (no explicit `WellFoundedRelation` instance needed).
+-- Previous v2 commit: hexa-meta `2c68bea`.
 --
--- raw_91 honest C3 disclosure (2026-05-12 cycle-30+++):
---   The v2 exponential-in-depth bound is the worst-case Π^p_2 verifier
---   cost in symbolic-alternation-elimination terms. Tighter sub-exponential
---   bounds may apply to specific instance families (e.g. the v1 polynomial
---   bound is correct for the bounded-instance v3 exhaustive verifier on the
---   12-strand catalogue, where payload structure constrains the search).
---   v2 is the *worst-case* claim; v3 (cycle-30+++) could parametrise over
---   verifier strategies (with the bound switching by query family). The
---   exponential 2^depth uses Nat.pow which is decidable; no Mathlib import
---   needed here (Strategy.lean already pulls Mathlib for ℝ, so the package
---   is loaded — we just don't use Mathlib lemmas in this file).
+-- raw_91 honest C3 disclosure (2026-05-12 cycle-30+++++):
+--   v2 model: verifierSteps q := c.size * 2^q.depth + q.payload (closed-form
+--   upper bound).
+--   v3 model: verifierSteps q := verifierStepsRec c.size q.depth q.payload,
+--   where verifierStepsRec is a recursive function structurally decreasing
+--   on the depth argument (base case: depth = 0 returns sz + payload as a
+--   leaf-level catalogue scan; inductive case: depth = d+1 doubles the
+--   recursive call at depth d, modelling the ∃/∀ alternation branching).
+--   Closed-form characterisation: verifierStepsRec sz d p = 2^d * (sz + p)
+--   — kernel-checked as `verifierStepsRec_closed_form`. This is *stricter*
+--   than v2 (v2 = sz·2^d + p; v3 = 2^d·(sz + p) = sz·2^d + p·2^d ≥ v2 when
+--   2^d ≥ 1), but in the same exponential complexity class.
+--   v3 termination is by Lean's automatic structural-recursion on Nat
+--   (well-foundedness of `Nat.rec`), not an explicit WellFoundedRelation
+--   instance — that is intentional: the standard `Nat.rec` IS the
+--   well-founded recursor on Nat. A v4 stretch could use `WellFoundedRelation`
+--   over an arbitrary measure function (e.g. `(catalogue_size, query_depth)`
+--   lex-order via `Prod.lex`) to model verifiers whose recursion is not on
+--   depth alone — intentionally out of scope for v3.
+
+import Mathlib.Tactic.Linarith
+import Mathlib.Tactic.Ring
 
 namespace N6
 namespace Weave
@@ -40,14 +52,20 @@ structure Pi_p_2_Query (_c : StrandCatalogue) where
   payload : Nat
   deriving Repr
 
-/-- Step count of the verifier on a query (v2: exponential-in-depth).
-    `verifierSteps q = c.size * 2 ^ q.depth + q.payload`. The exponential
-    factor captures the Π^p_2 alternation cost (2^d nested ∀-elimination
-    branches in the worst case). For the bounded-instance v3 verifier on
-    the 12-strand catalogue the actual cost is sub-exponential (see v1
-    comment); this v2 definition is the *worst-case* bound. -/
+/-- Recursive verifier step counter (v3: structural recursion on alternation
+    depth). Terminates by Lean's automatic well-founded recursion on Nat.
+    - base (depth = 0): a single catalogue scan + payload check.
+    - step (depth = d+1): two recursive sub-calls at depth d (modelling the
+      ∃/∀ alternation branching at this level). -/
+def verifierStepsRec (sz : Nat) (depth : Nat) (payload : Nat) : Nat :=
+  match depth with
+  | 0     => sz + payload
+  | d + 1 => 2 * verifierStepsRec sz d payload
+
+/-- Step count of the verifier on a query (v3: recursive). The closed-form
+    is `2^q.depth * (c.size + q.payload)` — see `verifierStepsRec_closed_form`. -/
 def verifierSteps {c : StrandCatalogue} (q : Pi_p_2_Query c) : Nat :=
-  c.size * 2 ^ q.depth + q.payload
+  verifierStepsRec c.size q.depth q.payload
 
 /-- The exponential factor is at least 1 for any depth. -/
 theorem two_pow_pos (d : Nat) : 1 ≤ 2 ^ d := by
@@ -58,17 +76,56 @@ theorem two_pow_pos (d : Nat) : 1 ≤ 2 ^ d := by
       rw [Nat.pow_succ]; omega
     exact Nat.le_trans ih hstep
 
-/-- Monotonicity in depth: deeper queries take at least as many steps. -/
+/-- **Closed-form characterisation of `verifierStepsRec`** (v3 ↔ exponential
+    bound link). Proved by induction on `d` using `Nat.pow_succ` and `ring`.
+    This is the kernel-checked statement that the recursive verifier's cost
+    is *exactly* `2^d · (sz + p)` — confirming the v2 exponential complexity
+    class while now backed by a real recursion. -/
+theorem verifierStepsRec_closed_form (sz d p : Nat) :
+    verifierStepsRec sz d p = 2 ^ d * (sz + p) := by
+  induction d with
+  | zero =>
+    simp [verifierStepsRec]
+  | succ n ih =>
+    show verifierStepsRec sz (n + 1) p = 2 ^ (n + 1) * (sz + p)
+    unfold verifierStepsRec
+    rw [ih, Nat.pow_succ]
+    ring
+
+/-- Monotonicity in depth + payload: deeper/heavier queries take at least
+    as many recursive steps. Proof goes through the closed-form. -/
 theorem verifierSteps_mono_depth
     {c : StrandCatalogue} (q q' : Pi_p_2_Query c)
     (hd : q.depth ≤ q'.depth) (hp : q.payload ≤ q'.payload) :
     verifierSteps q ≤ verifierSteps q' := by
   unfold verifierSteps
-  have h12 : 1 ≤ 2 := by omega
+  rw [verifierStepsRec_closed_form, verifierStepsRec_closed_form]
+  have h12 : (1 : Nat) ≤ 2 := by omega
   have hpow : 2 ^ q.depth ≤ 2 ^ q'.depth := Nat.pow_le_pow_right h12 hd
-  have hmul : c.size * 2 ^ q.depth ≤ c.size * 2 ^ q'.depth :=
-    Nat.mul_le_mul_left c.size hpow
-  exact Nat.add_le_add hmul hp
+  have hsum : c.size + q.payload ≤ c.size + q'.payload :=
+    Nat.add_le_add_left hp _
+  exact Nat.mul_le_mul hpow hsum
+
+/-- **Bonus theorem** (v3 ≥ v2-bound link): the v3 recursive verifier cost
+    is at least the v2 closed-form upper bound `c.size * 2^q.depth +
+    q.payload`. Confirms the v2 → v3 promotion is *stricter* (the recursive
+    model is more pessimistic than the v2 closed-form because every
+    alternation level multiplies the payload work too, not just the
+    catalogue-scan work). -/
+theorem verifierSteps_ge_v2_bound
+    {c : StrandCatalogue} (q : Pi_p_2_Query c) :
+    c.size * 2 ^ q.depth + q.payload ≤ verifierSteps q := by
+  unfold verifierSteps
+  rw [verifierStepsRec_closed_form]
+  -- Goal: c.size * 2^d + payload ≤ 2^d * (c.size + payload)
+  --     = 2^d * c.size + 2^d * payload
+  -- Need: payload ≤ 2^d * payload (since 2^d ≥ 1)
+  have h1 : 1 ≤ 2 ^ q.depth := two_pow_pos q.depth
+  have hp : q.payload ≤ 2 ^ q.depth * q.payload := by
+    have : 1 * q.payload ≤ 2 ^ q.depth * q.payload :=
+      Nat.mul_le_mul_right q.payload h1
+    linarith
+  nlinarith [hp]
 
 end Weave
 end N6
