@@ -9,8 +9,10 @@ import Lake
 open Lake DSL
 
 package «n6-formal-stub» where
-  -- Stub layer for axes F-CL-FORMAL-1..4. All four theorems carry `sorry`
-  -- as proof body. raw_91 honest C3 disclosure: structural skeleton only.
+  -- Consumer-contract layer for axes F-CL-FORMAL-1..4. All four theorem
+  -- proof bodies are kernel-checked against (richer-than-original-stub)
+  -- WEAVE semantics (2026-05-12 cycle-30 upgrade). raw_91 honest C3:
+  -- semantics still a v1 model, not the full WEAVE composition algebra.
 
 lean_lib «N6» where
   roots := #[`N6.InvariantLattice.Sigma,
@@ -21,9 +23,11 @@ lean_lib «N6» where
              `N6.Weave.PiP2Termination,
              `N6.Weave.ClosureCert]
 
--- Mathlib pin (commit hash to attempt; may be replaced with a known-good
--- SHA in cycle-30+ once a proof body actually needs Mathlib lemmas). The
--- stub-layer theorems do not currently require Mathlib because all proof
--- bodies are `sorry`; the require below is included for future-proofing.
-require mathlib from git
-  "https://github.com/leanprover-community/mathlib4.git" @ "master"
+-- Mathlib is NOT required by the current proof bodies. The 4-axis proofs
+-- use only Lean 4 core tactics (`rfl`, `simp [...]`, `omega`, structural
+-- case-splits). The earlier forward-looking `require mathlib` was removed
+-- 2026-05-12 because (a) no proof body currently consumes a Mathlib lemma,
+-- and (b) the `master` pin made `lake build` clone the entire mathlib4
+-- repo (~minutes) on every fresh build, which is wasted work as long as
+-- no proof imports it. Re-add (with a SHA pin, not `master`) when the
+-- first real proof body needs a Mathlib lemma.
