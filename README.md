@@ -12,6 +12,18 @@
 
 ---
 
+## Install
+
+```bash
+# 1. Install hexa-lang (ships `hexa` + `hx` package manager)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/dancinlab/hexa-lang/main/install.sh)"
+
+# 2. Install hexa-meta
+hx install hexa-meta          # global, pulls latest from registry
+```
+
+---
+
 ## Why
 
 `hexa-meta` is the **meta** member of the HEXA family. Everything here is about
