@@ -1,0 +1,18 @@
+# hexa-meta runtime artifacts (not source)
+state/
+/tmp/_hexa_meta_v.out
+
+# Lean build outputs
+formal/lean4/.lake/
+formal/lean4/build/
+formal/lean4/lakefile.olean
+*.olean
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# OS / editor
+.DS_Store
+*.swp
+*~

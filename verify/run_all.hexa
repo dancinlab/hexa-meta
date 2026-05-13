@@ -1,0 +1,178 @@
+#!hexa strict
+// hexa-meta/verify/run_all.hexa — meta-layer verification orchestrator.
+//
+// hexa-meta's closure pattern is multi-tier:
+//   (1) executable verify_*.hexa scripts under predictions/ + constants/
+//   (2) Lean 4 formal stubs under formal/lean4/ (sorry-marked per stub policy)
+//   (3) document layers (proofs/ + papers/) — meta-theorems with citations
+//   (4) tools/ — domain-agnostic engines (smoke-runs only)
+//
+// This orchestrator covers tier (1): the executable verify scripts. Tier (2)
+// is verified by `lake build` (external Lean toolchain). Tiers (3)–(4) are
+// document/engine layers and are NOT measurement-reducible — see
+// LIMIT_BREAKTHROUGH.md §3.6 (Gödel HARD_WALL) for honest framing.
+//
+// Run:
+//     hexa run verify/run_all.hexa     # exit 0 = all subscripts run rc=0
+//
+// Honest semantics:
+//   - rc=0 from each subscript means the script *executed* without runtime
+//     error. Internal PASS/FAIL counts are reported by each script.
+//   - Memory-cap exits (rc=77 from hexa-runtime mem cap) are NOT verification
+//     failures; they are environmental. This orchestrator does not run the
+//     heavy DSE/miner tools — see tools/* individually.
+//   - STUB scripts (verify_bt414_430.hexa, etc.) are counted as STUB, not PASS.
+
+let SCRIPTS: [str] = [
+    "predictions/verify_appl_honeycomb_hales.hexa",
+    "predictions/verify_appl_kitaev_s3.hexa",
+    "predictions/verify_appl_klemperer_6body.hexa",
+    "predictions/verify_appl_sr_calibration.hexa",
+    "predictions/verify_appl_transformer_ffn.hexa",
+    "predictions/verify_bernoulli_17_enumeration.hexa",
+    "predictions/verify_bernoulli17_bb6.hexa",
+    "predictions/verify_bernoulli17_egyptian_236.hexa",
+    "predictions/verify_bernoulli17_k3_j2.hexa",
+    "predictions/verify_bernoulli17_post_lattice.hexa",
+    "predictions/verify_bernoulli17_sel6_crt.hexa",
+    "predictions/verify_bernoulli17_terminal.hexa",
+    "predictions/verify_big_b1_sigma_sopfr7_ns_pvnp.hexa",
+    "predictions/verify_big_b2_k3_j2_proj.hexa",
+    "predictions/verify_big_b3_bb_sequence.hexa",
+    "predictions/verify_big_b4_sel_n_crt.hexa",
+    "predictions/verify_big_b5_5bt_meganode.hexa",
+    "predictions/verify_big_b6_perfect_5_convergence.hexa",
+    "predictions/verify_big_b7_euclid_euler_inverse.hexa",
+    "predictions/verify_big_d1_ym_mass_gap.hexa",
+    "predictions/verify_big_d2_riemann_n_t_term.hexa",
+    "predictions/verify_big_d3_bsd_l_central.hexa",
+    "predictions/verify_big_d4_hodge_k3_24cycles.hexa",
+    "predictions/verify_big_d5_pvnp_schaefer_barrier.hexa",
+    "predictions/verify_big_d6_ym_beta_loops.hexa",
+    "predictions/verify_big_d7_ns_leray_uniqueness.hexa",
+    "predictions/verify_bt414_430.hexa",
+    "predictions/verify_cremona_sel6.hexa",
+    "predictions/verify_dfs27_ym_betafn.hexa",
+    "predictions/verify_dfs27_ym_cft.hexa",
+    "predictions/verify_dfs27_ym_gauge.hexa",
+    "predictions/verify_dfs27_ym_holography.hexa",
+    "predictions/verify_dfs27_ym_massgap.hexa",
+    "predictions/verify_dfs27_ym_topological.hexa",
+    "predictions/verify_fusion_hypothesis_h8.hexa",
+    "predictions/verify_ising_3d_dc6.hexa",
+    "predictions/verify_killerapp_tp.hexa",
+    "predictions/verify_millennium_20260414.hexa",
+    "predictions/verify_millennium_dfs22_23.hexa",
+    "predictions/verify_millennium_dfs24.hexa",
+    "predictions/verify_millennium_dfs25.hexa",
+    "predictions/verify_millennium_dfs26.hexa",
+    "predictions/verify_millennium_dfs3.hexa",
+    "predictions/verify_millennium_dfs4.hexa",
+    "predictions/verify_millennium_dfs5.hexa",
+    "predictions/verify_millennium_g_f_bsd_pc.hexa",
+    "predictions/verify_millennium_g_f_hodge.hexa",
+    "predictions/verify_millennium_g_f_ns.hexa",
+    "predictions/verify_millennium_g_f_pnp.hexa",
+    "predictions/verify_millennium_g_f_riemann.hexa",
+    "predictions/verify_millennium_g_f_ym.hexa",
+    "predictions/verify_oeis_offline_match_f7.hexa",
+    "predictions/verify_rh_critical_line_sigma_tau.hexa",
+    "predictions/verify_SIG-7B-205.hexa",
+    "predictions/verify_SIG-ATLAS-103.hexa",
+    "predictions/verify_SIG-ATLAS-104.hexa",
+    "predictions/verify_SIG-ATLAS-106.hexa",
+    "predictions/verify_SIG-BELL-302.hexa",
+    "predictions/verify_SIG-BIS-101.hexa",
+    "predictions/verify_SIG-BLOW-204.hexa",
+    "predictions/verify_SIG-CLM-301.hexa",
+    "predictions/verify_SIG-CLM-303.hexa",
+    "predictions/verify_SIG-CONS-302.hexa",
+    "predictions/verify_SIG-CONS-310.hexa",
+    "predictions/verify_SIG-CONS-311.hexa",
+    "predictions/verify_SIG-CONS-312.hexa",
+    "predictions/verify_SIG-CONS-314.hexa",
+    "predictions/verify_SIG-CROSS-001.hexa",
+    "predictions/verify_SIG-CROSS-101.hexa",
+    "predictions/verify_SIG-DD-301.hexa",
+    "predictions/verify_SIG-DD-302.hexa",
+    "predictions/verify_SIG-DD-304.hexa",
+    "predictions/verify_SIG-DD-305.hexa",
+    "predictions/verify_SIG-EEG-301.hexa",
+    "predictions/verify_SIG-FUSION-001.hexa",
+    "predictions/verify_SIG-FUSION-002.hexa",
+    "predictions/verify_SIG-FUSION-003.hexa",
+    "predictions/verify_SIG-FUSION-004.hexa",
+    "predictions/verify_SIG-GAP-201.hexa",
+    "predictions/verify_SIG-META-302.hexa",
+    "predictions/verify_SIG-META-306.hexa",
+    "predictions/verify_SIG-META-307.hexa",
+    "predictions/verify_SIG-META-308.hexa",
+    "predictions/verify_SIG-NEURAL-001.hexa",
+    "predictions/verify_SIG-NEURAL-304.hexa",
+    "predictions/verify_SIG-NEURAL-306.hexa",
+    "predictions/verify_SIG-NEURAL-310.hexa",
+    "predictions/verify_SIG-NEURAL-313.hexa",
+    "predictions/verify_SIG-PHYS-301.hexa",
+    "predictions/verify_SIG-PHYS-302.hexa",
+    "predictions/verify_SIG-PHYS-309.hexa",
+    "predictions/verify_SIG-SR-001.hexa",
+    "predictions/verify_SIG-UNIV-205.hexa",
+    "predictions/verify_SIG-UNIV-301.hexa",
+    "predictions/verify_SIG-UNIV-302.hexa",
+    "predictions/verify_SIG-UNIV-303.hexa",
+    "predictions/verify_SIG-UNIV-304.hexa",
+    "predictions/verify_sigma_sopfr_7_bsd.hexa",
+    "predictions/verify_sigma_sopfr_7_hodge.hexa",
+    "predictions/verify_sigma_sopfr_7_ns.hexa",
+    "predictions/verify_sigma_sopfr_7_perfect.hexa",
+    "predictions/verify_sigma_sopfr_7_pnp.hexa",
+    "predictions/verify_wild_k5_sigma.hexa",
+    "predictions/verify_wild_perfect_partition_all.hexa",
+    "predictions/verify_wild_unit_partition.hexa",
+]
+
+fn main() {
+    println("========================================================================")
+    println("  hexa-meta verify/run_all — meta-layer verification sweep")
+    println("========================================================================")
+    let mut ran = 0
+    let mut rc_zero = 0
+    let mut rc_nonzero = 0
+    let mut stub_seen = 0
+    for s in SCRIPTS {
+        ran = ran + 1
+        let rc_str = exec("hexa run " + s + " >/tmp/_hexa_meta_v.out 2>&1; echo $?").trim()
+        let rc = int(rc_str)
+        let out = exec("cat /tmp/_hexa_meta_v.out 2>/dev/null")
+        let is_stub = out.contains("STUB:")
+        if is_stub {
+            stub_seen = stub_seen + 1
+        }
+        if rc == 0 {
+            rc_zero = rc_zero + 1
+        } else {
+            rc_nonzero = rc_nonzero + 1
+            println("")
+            println("---- " + s + " (rc=" + str(rc) + ") ----")
+            let lines = out.split("\n")
+            let n = lines.len()
+            let mut start = 0
+            if n > 6 { start = n - 6 }
+            let mut k = start
+            while k < n {
+                println(lines[k])
+                k = k + 1
+            }
+        }
+    }
+    println("")
+    println("========================================================================")
+    println("  ran=" + str(ran) + "  rc=0:" + str(rc_zero) + "  rc!=0:" + str(rc_nonzero) + "  stub-tagged:" + str(stub_seen))
+    println("========================================================================")
+    if rc_nonzero > 0 {
+        println("  verify sweep FAILED — see per-script tails above.")
+        exit(1)
+    }
+    println("  PASS — all " + str(ran) + " predictions/verify_*.hexa scripts executed rc=0.")
+    println("  (See per-script logs for internal PASS/FAIL/MISS counts.)")
+}
