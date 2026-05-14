@@ -1,16 +1,28 @@
-# 🌀 hexa-meta — n=6 meta-theory · self-architecture · proof-cert · discovery tooling
+<p align="center">
+  <img src="docs/logo.svg" width="140" alt="hexa-meta">
+</p>
+
+<h1 align="center">🌀 hexa-meta</h1>
+
+<p align="center"><strong>HEXA-Meta family</strong> — meta-theoretic · self-architecture · proof-cert · discovery tooling</p>
+
+<p align="center">
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-blue"></a>
+  <a href=".github/workflows/lint.yml"><img alt="CI" src="https://github.com/dancinlab/hexa-meta/actions/workflows/lint.yml/badge.svg"></a>
+  <img alt="Spec" src="https://img.shields.io/badge/spec-v0.1-success">
+  <img alt="Bundle" src="https://img.shields.io/badge/bundle-24%20papers%20·%2011%20proofs%20·%2015%20tools-informational">
+  <img alt="Verify" src="https://img.shields.io/badge/verify-105%2F105-informational">
+  <img alt="DOI" src="https://zenodo.org/badge/DOI/10.5281/zenodo.20114998.svg">
+  <img alt="Sibling" src="https://img.shields.io/badge/sibling-hexa--grid%20·%20hexa--millennium%20·%20hexa--mobility-blueviolet">
+</p>
+
+<p align="center">meta-theorem · self-organizing-architecture · proof-cert-chain · discovery-engine · DSE · universal-tooling</p>
+
+---
 
 > The n=6 framework reflecting on itself: meta-theorems, self-organizing
 > architecture papers, proof-certification chains, and the domain-agnostic
 > discovery / DSE / verification tooling that powers every other `hexa-*` repo.
-
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20114998.svg)](https://doi.org/10.5281/zenodo.20114998)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.1.0-informational.svg)](hexa.toml)
-[![Bundle](https://img.shields.io/badge/bundle-24_papers_+_11_proofs_+_15_tools-blue.svg)](#layout)
-[![Verify](https://img.shields.io/badge/verify-105%2F105_rc%3D0-brightgreen.svg)](verify/run_all.hexa)
-[![Closure](https://img.shields.io/badge/closure-META__4TIER-blueviolet.svg)](#closure)
-[![Status](https://img.shields.io/badge/status-bundle--first-orange.svg)](#status)
 
 ---
 
@@ -45,13 +57,31 @@ n=6 *itself* rather than a particular application domain:
 
 ---
 
-## Layout
+## Repo layout
 
 ```
 hexa-meta/
-├── proofs/   11 meta-theory proof docs        (← canon theory/proofs/)
-├── papers/   24 self-architecture papers       (← canon papers/)
-└── tools/    15 domain-agnostic calc/DSE tools  (← canon bridge/origins/)
+├── README.md
+├── LICENSE                       MIT
+├── AGENTS.tape                   identity + governance (.tape v1.2)
+├── hexa.toml                     package manifest
+├── proofs/                       11 meta-theory proof docs        (← canon theory/proofs/)
+├── papers/                       24 self-architecture papers       (← canon papers/)
+├── tools/                        15 domain-agnostic calc/DSE tools (← canon bridge/origins/)
+├── breakthroughs/                breakthrough records (7)
+├── constants/                    physical / math constants (5)
+├── flow/                         flow systems (4)
+├── formal/                       formal / Lean4 stub layer
+├── predictions/                  105 verify_*.hexa prediction sweep
+├── preprints/                    pre-print drafts
+├── proofs/                       proof artifacts
+├── roadmap-v2/  roadmap-v3/      roadmap snapshots
+├── study/                        study notes
+├── verify/                       run_all.hexa + closure scripts
+├── state/                        runtime state (gitignored)
+├── docs/logo.svg                 repo logo
+├── LATTICE_POLICY.md             real-limits policy
+└── LIMIT_BREAKTHROUGH.md         HARD/SOFT wall audit
 ```
 
 ## Run
@@ -99,3 +129,7 @@ remains future work. See [`IMPORTED_FROM_CANON.md`](IMPORTED_FROM_CANON.md).
 ## Provenance
 
 Moved from `canon/{theory/proofs,papers,bridge/origins}` at canon SHA `a86ca143` on 2026-05-10.
+
+## License
+
+[MIT](LICENSE).
