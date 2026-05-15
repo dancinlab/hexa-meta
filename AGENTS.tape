@@ -46,7 +46,7 @@
 @I id001 := "hexa-meta" :: identity-claim [d=2026-05-14 active]
   kind = "HEXA-Meta family — meta-theoretic"
   brief = "HEXA-Meta family · meta-theoretic"
-  parent = "dancinlab/echoes"
+  parent = "dancinlab"
 
 @L l1 := "repo-layout" :: structure [active]
   _theory_index.json -> "JSON"
